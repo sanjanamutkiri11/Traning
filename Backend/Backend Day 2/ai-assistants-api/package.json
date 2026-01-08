@@ -1,0 +1,21 @@
+{
+  "name": "ai-assistants-api",
+  "version": "1.0.0",
+  "description": "REST API for AI Assistant Personalities",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "keywords": ["express", "rest-api", "nodejs"],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "body-parser": "^2.2.2",
+    "express": "^4.22.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.11"
+  }
+}
