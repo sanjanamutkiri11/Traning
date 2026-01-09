@@ -1,4 +1,4 @@
-##Traning
-#1 Database
-#2 Github
-#3 Backend 
+## Traning
+# 1 Database
+# 2 Github
+# 3 Backend 
