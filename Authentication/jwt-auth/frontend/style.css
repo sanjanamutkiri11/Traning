@@ -1,0 +1,7 @@
+body { font-family: Arial, sans-serif; padding: 20px; background: #f0f0f0; }
+h1 { color: #333; }
+.section { margin-bottom: 30px; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 0 5px #aaa; }
+input, button, textarea { width: 100%; padding: 10px; margin: 5px 0; }
+button { background: #4CAF50; color: white; border: none; cursor: pointer; }
+button:hover { background: #45a049; }
+textarea { height: 100px; }

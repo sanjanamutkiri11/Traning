@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JWT Auth Mini</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<h1>JWT Authentication Demo</h1>
+
+<div class="section">
+  <h3>Generate Token</h3>
+  <input type="text" id="user" placeholder="Enter User ID">
+  <button onclick="generateToken()">Generate Token</button>
+  <textarea id="generatedToken" placeholder="Token will appear here"></textarea>
+</div>
+
+<div class="section">
+  <h3>Validate Token</h3>
+  <input type="text" id="token" placeholder="Paste Token here">
+  <button onclick="validateToken()">Validate Token</button>
+  <textarea id="validationResult" placeholder="Validation result will appear here"></textarea>
+</div>
+
+<script>
+async function generateToken() {
+    const user = document.getElementById('user').value;
+    const res = await fetch(`http://localhost:8080/generate?user=${user}`);
+    const token = await res.text();
+    document.getElementById('generatedToken').value = token;
+    document.getElementById('token').value = token; // auto-fill validate field
+}
+
+async function validateToken() {
+    const token = document.getElementById('token').value;
+    const res = await fetch(`http://localhost:8080/validate?token=${token}`);
+    const result = await res.text();
+    document.getElementById('validationResult').value = result;
+}
+</script>
+</body>
+</html>
