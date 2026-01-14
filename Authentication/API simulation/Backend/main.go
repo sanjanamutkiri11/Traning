@@ -24,8 +24,8 @@ var items = []Item{
 func main() {
 	http.HandleFunc("/api/document", handleDocument)
 
-	fmt.Println("Server running at http://localhost:8080")
-	http.ListenAndServe(":8080", nil)
+	fmt.Println("Server running at http://localhost:8082")
+	http.ListenAndServe(":8082", nil)
 }
 
 func handleDocument(w http.ResponseWriter, r *http.Request) {

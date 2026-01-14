@@ -71,6 +71,6 @@ func main() {
 	http.HandleFunc("/generate", generateHandler)
 	http.HandleFunc("/validate", validateHandler)
 
-	fmt.Println("Server running on http://localhost:8080")
-	http.ListenAndServe(":8080", nil)
+	fmt.Println("Server running on http://localhost:8001")
+	http.ListenAndServe(":8081", nil)
 }

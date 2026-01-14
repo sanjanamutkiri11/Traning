@@ -10,7 +10,6 @@ type Expense struct {
 var Expenses []Expense
 var NextID = 1
 
-// GetExpenseByID returns a pointer to the expense with the given ID, or nil if not found
 func GetExpenseByID(id int) *Expense {
 	for i := range Expenses {
 		if Expenses[i].ID == id {
@@ -20,7 +19,6 @@ func GetExpenseByID(id int) *Expense {
 	return nil
 }
 
-// DeleteExpenseByID deletes an expense by ID, returns true if deleted
 func DeleteExpenseByID(id int) bool {
 	for i := range Expenses {
 		if Expenses[i].ID == id {

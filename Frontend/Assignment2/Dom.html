@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="message">Hello World</div>
+<button id="changeBtn">Change Text</button>
+
+<br>
+<br>
+<br>
+
+<ul id="list">
+    <li>Item 1</li>
+  </ul>
+  
+  <button id="addItem">Add Item</button>
+
+  <br>
+  <br>
+  <br>
+  <p id="removeMe">Remove this text</p>
+<button id="removeBtn">Remove</button>
+
+  
+<script>
+    const message = document.getElementById("message");
+    const changeBtn = document.getElementById("changeBtn");
+  
+    changeBtn.addEventListener("click", () => {
+      message.textContent = "Text changed successfully!";
+    });
+
+    const list = document.getElementById("list");
+  const addBtn = document.getElementById("addItem");
+
+  addBtn.addEventListener("click", () => {
+    const li = document.createElement("li");
+    li.textContent = "New Item";
+    list.appendChild(li);
+  });
+
+  const para = document.getElementById("removeMe");
+  const removeBtn = document.getElementById("removeBtn");
+
+  removeBtn.addEventListener("click", () => {
+    para.remove();
+  });
+  </script>
+  
+</body>
+
+</html>
