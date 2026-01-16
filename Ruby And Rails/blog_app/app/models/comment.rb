@@ -1,9 +1,6 @@
 class Comment < ApplicationRecord
+  belongs_to :user
   belongs_to :blog
 
-  validate :blog_must_be_published
-
-  def blog_must_be_published
-    errors.add(:blog, "must be published") unless blog&.published?
-  end
+  validates :body, :user_id, :blog_id, presence: true
 end

@@ -1,16 +1,9 @@
-10.times do
-    Blog.create!(
-      title: "Published Blog",
-      body: "This is a published blog content",
-      published: true
-    )
-  end
-  
-  10.times do
-    Blog.create!(
-      title: "Unpublished Blog",
-      body: "This is an unpublished blog content",
-      published: false
-    )
-  end
-  
+# This file should ensure the existence of records required to run the application in every environment (production,
+# development, test). The code here should be idempotent so that it can be executed at any point in every environment.
+# The data can then be loaded with the bin/rails db:seed command (or created alongside the database with db:setup).
+#
+# Example:
+#
+#   ["Action", "Comedy", "Drama", "Horror"].each do |genre_name|
+#     MovieGenre.find_or_create_by!(name: genre_name)
+#   end

@@ -1,5 +1,6 @@
 class Blog < ApplicationRecord
-    validates :title, presence: true
-    validates :body, length: { minimum: 10 }
-  end
-  
+  belongs_to :user
+  has_many :comments, dependent: :destroy
+
+  validates :title, :body, :user_id, presence: true
+end
