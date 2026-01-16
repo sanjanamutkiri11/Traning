@@ -21,7 +21,7 @@ const mergedArray = [...arr1, ...arr2];
 
 console.log(mergedArray);
 
-//Function accepting 5 numbers and their sum(rest)
+
 
 function sumAll(...numbers) {
     const sum = numbers.reduce((acc, curr) => acc + curr, 0);

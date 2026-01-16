@@ -1,5 +1,5 @@
 const user = {
-    name: "Amar",
+    name: "Sanjana",
     age: 25,
     city: "Pune"
   };

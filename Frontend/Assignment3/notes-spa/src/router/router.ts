@@ -38,6 +38,5 @@ export const router = () => {
   }
 };
 
-// Listen to back/forward navigation
 window.addEventListener("popstate", router);
 window.addEventListener("route", router);

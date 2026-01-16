@@ -6,7 +6,7 @@ export const NoteList = () => {
   container.className = "note-list";
 
   if (notes.length === 0) {
-    container.innerHTML = `<p>No notes yet. Create one!</p>`;
+    container.innerHTML = `<p>No notes yet.</p>`;
     return container;
   }
 

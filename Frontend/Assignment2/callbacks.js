@@ -2,7 +2,7 @@ console.log("start")
 function runAfterTenSeconds(callback) {
     setTimeout(() => {
       callback();
-    }, 2000); // 10000 milliseconds = 10 seconds
+    }, 2000); 
   }
 
   runAfterTenSeconds(() => {

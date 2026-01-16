@@ -16,7 +16,9 @@ function createCounter() {
   
   const counter2 = createCounter();
   counter2(); 
-//inner function acess
+
+
+  
 function outer() {
     let message = "Hello";
   

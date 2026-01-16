@@ -1,4 +1,4 @@
-let c=23;
+
 const timer=setInterval(()=>{
     console.log(c)
     c--;
@@ -7,4 +7,4 @@ const timer=setInterval(()=>{
         console.log("Time up")
     }
 },1000)
-c=4
+let c=4
