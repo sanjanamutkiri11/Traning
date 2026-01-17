@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mock SSO - Horizontal</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: white;
+        }
+
+        .section {
+            padding: 20px;
+            border: 1px solid #000;
+        }
+
+        .app-section {
+            height: 50vh;
+            background-color: #f0f0f0;
+        }
+
+        .idp-section {
+            height: 50vh;
+            background-color: #e0e0e0;
+        }
+
+        h2 {
+            margin-top: 0;
+        }
+
+        input {
+            padding: 5px;
+            margin: 5px 0;
+            border: 1px solid #000;
+        }
+
+        button {
+            padding: 8px 16px;
+            background-color: #000;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin: 5px 0;
+        }
+
+        button:disabled {
+            background-color: #999;
+            cursor: not-allowed;
+        }
+
+        textarea {
+            width: 100%;
+            height: 60px;
+            border: 1px solid #000;
+            font-family: monospace;
+        }
+
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #000;
+            background-color: white;
+        }
+
+        .payload {
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #000;
+            background-color: white;
+            font-family: monospace;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- App Section (Top) -->
+    <div class="section app-section">
+        <h2>Application</h2>
+
+        <div class="status" id="appStatus">Redirecting to IdP...</div>
+
+        <div id="tokenArea" style="display: none;">
+            <p>Access Token:</p>
+            <textarea id="accessToken" readonly></textarea>
+        </div>
+
+        <div id="payloadArea" style="display: none;">
+            <p>Payload:</p>
+            <div class="payload" id="payload"></div>
+        </div>
+    </div>
+
+    <!-- IdP Section (Bottom) -->
+    <div class="section idp-section">
+        <h2>Identity Provider</h2>
+
+        <div>
+            <p>Username: <input type="text" id="username"></p>
+            <p>Password: <input type="password" id="password"></p>
+            <button id="idpLoginBtn">Login</button>
+        </div>
+
+        <div class="status" id="idpStatus">Enter credentials</div>
+
+        <div id="validateArea" style="display: none;">
+            <button id="validateBtn">Validate</button>
+        </div>
+    </div>
+
+    <script>
+        const API = 'http://localhost:9090/api';
+
+        let token = null;
+
+        const appStatus = document.getElementById('appStatus');
+        const tokenArea = document.getElementById('tokenArea');
+        const accessToken = document.getElementById('accessToken');
+        const validateBtn = document.getElementById('validateBtn');
+        const validateArea = document.getElementById('validateArea');
+        const payloadArea = document.getElementById('payloadArea');
+        const payload = document.getElementById('payload');
+
+        const username = document.getElementById('username');
+        const password = document.getElementById('password');
+        const idpLoginBtn = document.getElementById('idpLoginBtn');
+        const idpStatus = document.getElementById('idpStatus');
+
+        idpLoginBtn.addEventListener('click', async () => {
+            const user = username.value;
+            const pass = password.value;
+
+            if (!user || !pass) {
+                idpStatus.textContent = 'Enter both fields';
+                return;
+            }
+
+            idpStatus.textContent = 'Authenticating...';
+
+            try {
+                const res = await fetch(`${API}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: user, password: pass })
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    token = data.access_token;
+                    idpStatus.textContent = 'Login successful';
+                    accessToken.value = token;
+                    tokenArea.style.display = 'block';
+                    validateArea.style.display = 'block';
+                    appStatus.textContent = 'Token received';
+                    username.value = '';
+                    password.value = '';
+                    idpLoginBtn.disabled = true;
+                } else {
+                    idpStatus.textContent = 'Login failed';
+                }
+            } catch (err) {
+                idpStatus.textContent = 'Error: ' + err.message;
+            }
+        });
+
+        validateBtn.addEventListener('click', async () => {
+            appStatus.textContent = 'Validating...';
+
+            try {
+                const res = await fetch(`${API}/validate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token })
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    appStatus.textContent = 'Token valid';
+                    payload.textContent = JSON.stringify(data.payload, null, 2);
+                    payloadArea.style.display = 'block';
+                } else {
+                    appStatus.textContent = 'Invalid token';
+                }
+            } catch (err) {
+                appStatus.textContent = 'Error: ' + err.message;
+            }
+        });
+    </script>
+</body>
+
+</html>

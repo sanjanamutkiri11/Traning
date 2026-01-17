@@ -1,109 +1,124 @@
 package main
 
 import (
-	"bufio"
-	"crypto/rand"
-	"fmt"
-	"os"
+	"encoding/base64"
+	"encoding/json"
+	"log"
+	"net/http"
 	"strings"
+	"time"
 )
 
+type LoginReq struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+type LoginRes struct {
+	AccessToken string `json:"access_token"`
+}
+
+type ValidateReq struct {
+	Token string `json:"token"`
+}
+
+type Payload struct {
+	Username  string `json:"username"`
+	Timestamp string `json:"timestamp"`
+}
+
+type ValidateRes struct {
+	Payload Payload `json:"payload"`
+}
+
+type ErrRes struct {
+	Error string `json:"error"`
+}
+
+func generateToken(username string) string {
+	p := Payload{
+		Username:  username,
+		Timestamp: time.Now().Format(time.RFC3339),
+	}
+	pJSON, _ := json.Marshal(p)
+	encodedPayload := base64.StdEncoding.EncodeToString(pJSON)
+	header := base64.StdEncoding.EncodeToString([]byte(`{"alg":"HS256"}`))
+	sig := base64.StdEncoding.EncodeToString([]byte("sig"))
+	return header + "." + encodedPayload + "." + sig
+}
+
+func validateToken(token string) (*Payload, error) {
+	parts := strings.Split(token, ".")
+	if len(parts) != 3 {
+		return nil, http.ErrNotSupported
+	}
+	payloadBytes, err := base64.StdEncoding.DecodeString(parts[1])
+	if err != nil {
+		return nil, err
+	}
+	var p Payload
+	if err := json.Unmarshal(payloadBytes, &p); err != nil {
+		return nil, err
+	}
+	return &p, nil
+}
+
+func cors(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+		next(w, r)
+	}
+}
+
+func handleLogin(w http.ResponseWriter, r *http.Request) {
+	var req LoginReq
+	json.NewDecoder(r.Body).Decode(&req)
+
+	if req.Username == "" || req.Password == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(ErrRes{Error: "missing fields"})
+		return
+	}
+
+	token := generateToken(req.Username)
+	log.Printf("Login: %s", req.Username)
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(LoginRes{AccessToken: token})
+}
+
+func handleValidate(w http.ResponseWriter, r *http.Request) {
+	var req ValidateReq
+	json.NewDecoder(r.Body).Decode(&req)
+
+	p, err := validateToken(req.Token)
+	if err != nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(ErrRes{Error: "invalid token"})
+		return
+	}
+
+	log.Printf("Validated: %s", p.Username)
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(ValidateRes{Payload: *p})
+}
+
 func main() {
-	reader := bufio.NewReader(os.Stdin)
+	http.HandleFunc("/api/login", cors(handleLogin))
+	http.HandleFunc("/api/validate", cors(handleValidate))
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "index.html")
+	})
 
-	// Step 1: Simulate Redirect
-	fmt.Println("Step 1: Redirecting to Identity Provider...")
-	fmt.Println("Opening login page...")
-
-	// Step 2: Simulate IdP Login
-	fmt.Println("\nStep 2: Identity Provider Login")
-	fmt.Print("Enter Username: ")
-	username, _ := reader.ReadString('\n')
-	username = strings.TrimSpace(username)
-
-	fmt.Print("Enter Password: ")
-	password, _ := reader.ReadString('\n')
-	password = strings.TrimSpace(password)
-
-	fmt.Println("\nLogin successful!")
-
-	// Generate a unique 6-character auth code
-	authCode := generateAuthCode(6)
-	fmt.Println("Auth Code:", authCode)
-
-	// Step 3: Token Exchange
-	fmt.Println("\nStep 3: Token Exchange")
-	var codeInput string
-	for {
-		fmt.Print("Enter Auth Code: ")
-		codeInput, _ = reader.ReadString('\n')
-		codeInput = strings.TrimSpace(codeInput)
-
-		if codeInput != authCode {
-			fmt.Println("Auth Code mismatch! Please enter again.")
-		} else {
-			break
-		}
-	}
-
-	// Generate mock tokens
-	idToken := generateMockToken("id")
-	accessToken := generateMockToken("access")
-	fmt.Println("\nToken Response:")
-	fmt.Printf("{ id_token: \"%s\", access_token: \"%s\" }\n", idToken, accessToken)
-
-	// Step 4: Token Verification
-	fmt.Println("\nStep 4: Token Verification")
-	verifyTokenFlow(reader, idToken)
-}
-
-// generateAuthCode creates a random alphanumeric code of given length
-func generateAuthCode(length int) string {
-	const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-	b := make([]byte, length)
-	_, err := rand.Read(b)
-	if err != nil {
-		panic(err)
-	}
-	for i := 0; i < length; i++ {
-		b[i] = chars[int(b[i])%len(chars)]
-	}
-	return string(b)
-}
-
-// generateMockToken creates a fake token string with 3 parts separated by '.'
-func generateMockToken(tokenType string) string {
-	return fmt.Sprintf("%s.%s.%s", tokenType, randomString(8), randomString(8))
-}
-
-// randomString generates random alphanumeric string of given length
-func randomString(length int) string {
-	const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-	b := make([]byte, length)
-	_, err := rand.Read(b)
-	if err != nil {
-		panic(err)
-	}
-	for i := 0; i < length; i++ {
-		b[i] = chars[int(b[i])%len(chars)]
-	}
-	return string(b)
-}
-
-// verifyTokenFlow handles terminal input to verify token
-func verifyTokenFlow(reader *bufio.Reader, validToken string) {
-	for {
-		fmt.Print("Enter Token to Verify: ")
-		inputToken, _ := reader.ReadString('\n')
-		inputToken = strings.TrimSpace(inputToken)
-
-		if inputToken == "" {
-			fmt.Println("Empty token entered!")
-		} else if inputToken != validToken {
-			fmt.Println("Token mismatch, please enter again!")
-		} else {
-			fmt.Println("Token Verified ✅")
-			break
-		}
+	log.Println("Server running on http://localhost:9090")
+	if err := http.ListenAndServe(":9090", nil); err != nil {
+		log.Fatal("Server failed to start: ", err)
 	}
 }
